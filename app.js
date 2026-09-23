@@ -15,7 +15,30 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+// ─── Swagger UI with CDN assets ───
+// app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+const SWAGGER_CSS_URL =
+  'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.15.5/swagger-ui.min.css';
+const SWAGGER_JS_URLS = [
+  'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.15.5/swagger-ui-bundle.js',
+  'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.15.5/swagger-ui-standalone-preset.js',
+];
+
+app.get('/docs.json', (req, res) => {
+  res.setHeader('Content-Type', 'application/json');
+  res.send(swaggerDocument);
+});
+
+app.use(
+  '/api-docs',
+  swaggerUi.serve,
+  swaggerUi.setup(swaggerDocument, {
+    customCssUrl: SWAGGER_CSS_URL,
+    customJs: SWAGGER_JS_URLS,
+    swaggerOptions: { url: '/docs.json' },
+  })
+);
+// ─── Swagger UI with CDN assets ───
 
 app.get('/', (req, res) => {
   res.status(200).json({ message: 'Finance Tracker API is running' });
