@@ -28,7 +28,6 @@ const getById = async (id) => {
 
 // ─────────────────────────────────────────────
 // POST — create user
-// Only whitelisted fields are inserted.
 // ─────────────────────────────────────────────
 const create = async (data) => {
   const db = getDb();
@@ -38,7 +37,6 @@ const create = async (data) => {
     email: data.email.toLowerCase().trim(),
     displayName: data.displayName.trim(),
     preferredCurrency: (data.preferredCurrency || 'USD').toUpperCase().trim(),
-    defaultAccountId: data.defaultAccountId ? new ObjectId(data.defaultAccountId) : null,
     createdAt: new Date(),
     updatedAt: new Date()
   };
@@ -49,7 +47,6 @@ const create = async (data) => {
 
 // ─────────────────────────────────────────────
 // PUT — update user
-// Only whitelisted fields are updated.
 // ─────────────────────────────────────────────
 const update = async (id, data) => {
   if (!ObjectId.isValid(id)) {
@@ -58,7 +55,6 @@ const update = async (id, data) => {
 
   const db = getDb();
 
-  // Only pick fields the controller says are allowed to change
   const updatedDoc = {
     email: data.email.toLowerCase().trim(),
     displayName: data.displayName.trim(),
@@ -95,4 +91,12 @@ const remove = async (id) => {
   return result;
 };
 
-export { getAll, getById, create, update, remove };
+// ─────────────────────────────────────────────
+// Helper: find by email (used for duplicate check)
+// ─────────────────────────────────────────────
+const findByEmail = async (email) => {
+  const db = getDb();
+  return db.collection(COLLECTION).findOne({ email: email.toLowerCase().trim() });
+};
+
+export { getAll, getById, create, update, remove, findByEmail };

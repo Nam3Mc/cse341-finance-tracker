@@ -116,6 +116,7 @@ const create = async (data) => {
 // PUT — update transaction
 // Reverts old balance effect, applies new one.
 // userId is immutable (ownership never changes).
+// Optional fields are only updated when provided.
 // ─────────────────────────────────────────────
 const update = async (id, data) => {
   if (!ObjectId.isValid(id)) {
@@ -130,18 +131,29 @@ const update = async (id, data) => {
     throw Object.assign(new Error('Transaction not found'), { status: 404 });
   }
 
+  // Always-updated fields (required by Swagger on PUT)
   const updatedDoc = {
     accountId: new ObjectId(data.accountId),
     categoryId: new ObjectId(data.categoryId),
     type: data.type,
     amount: Math.abs(Number(data.amount)),
     description: data.description.trim(),
-    date: data.date ? new Date(data.date) : new Date(),
-    paymentMethod: data.paymentMethod || 'other',
-    notes: (data.notes || '').trim(),
-    tags: cleanTags(data.tags),
     updatedAt: new Date()
   };
+
+  // Optional fields — only touch if provided
+  if (data.date !== undefined) {
+    updatedDoc.date = new Date(data.date);
+  }
+  if (data.paymentMethod !== undefined) {
+    updatedDoc.paymentMethod = data.paymentMethod;
+  }
+  if (data.notes !== undefined) {
+    updatedDoc.notes = data.notes.trim();
+  }
+  if (data.tags !== undefined) {
+    updatedDoc.tags = cleanTags(data.tags);
+  }
 
   const result = await db.collection(COLLECTION).findOneAndUpdate(
     { _id: new ObjectId(id) },
@@ -153,7 +165,7 @@ const update = async (id, data) => {
     throw Object.assign(new Error('Transaction not found'), { status: 404 });
   }
 
-  // Reverse the old effect
+  // Reverse the old balance effect
   await applyBalanceDelta(
     existing.accountId,
     -signedAmount(existing.type, existing.amount)

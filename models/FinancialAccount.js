@@ -59,6 +59,7 @@ const create = async (data) => {
 // Only whitelisted fields are updated.
 // userId and initialBalance are immutable.
 // currentBalance is NOT touched here (updated by transactions).
+// Optional fields are only updated when provided.
 // ─────────────────────────────────────────────
 const update = async (id, data) => {
   if (!ObjectId.isValid(id)) {
@@ -67,14 +68,23 @@ const update = async (id, data) => {
 
   const db = getDb();
 
+  // Always-updated fields (required by Swagger on PUT)
   const updatedDoc = {
     accountName: data.accountName.trim(),
     accountType: data.accountType,
-    currency: (data.currency || 'USD').toUpperCase().trim(),
-    description: (data.description || '').trim(),
-    isActive: data.isActive !== undefined ? data.isActive : true,
     updatedAt: new Date()
   };
+
+  // Optional fields — only touch if provided
+  if (data.currency !== undefined) {
+    updatedDoc.currency = data.currency.toUpperCase().trim();
+  }
+  if (data.description !== undefined) {
+    updatedDoc.description = data.description.trim();
+  }
+  if (data.isActive !== undefined) {
+    updatedDoc.isActive = data.isActive;
+  }
 
   const result = await db.collection(COLLECTION).findOneAndUpdate(
     { _id: new ObjectId(id) },

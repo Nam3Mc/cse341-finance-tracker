@@ -62,11 +62,16 @@ const update = async (id, data) => {
   const updatedDoc = {
     categoryName: data.categoryName.trim(),
     type: data.type,
-    color: (data.color || '#000000').toLowerCase().trim(),
-    icon: (data.icon || 'default').trim(),
     updatedAt: new Date()
   };
 
+  if (data.color !== undefined) {
+    updatedDoc.color = data.color.toLowerCase().trim();
+  }
+  if (data.icon !== undefined) {
+    updatedDoc.icon = data.icon.trim();
+  }
+  
   const result = await db.collection(COLLECTION).findOneAndUpdate(
     { _id: new ObjectId(id) },
     { $set: updatedDoc },
