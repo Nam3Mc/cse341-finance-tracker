@@ -25,7 +25,6 @@ app.use(async (req, res, next) => {
 })
 
 // ─── Swagger UI with CDN assets ───
-// app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 const SWAGGER_CSS_URL =
   'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.15.5/swagger-ui.min.css';
 const SWAGGER_JS_URLS = [

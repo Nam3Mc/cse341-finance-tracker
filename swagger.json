@@ -3,7 +3,7 @@
   "info": {
     "title": "Personal Finance Tracker API",
     "version": "1.0.0",
-    "description": "CSE 341 Week 3 - CRUD API for categories, accounts, and transactions"
+    "description": "CSE 341 Week 3 - CRUD API for users, categories, accounts, and transactions"
   },
   "servers": [
     {
@@ -12,11 +12,76 @@
     }
   ],
   "tags": [
+    { "name": "Users" },
     { "name": "Categories" },
     { "name": "Accounts" },
     { "name": "Transactions" }
   ],
   "paths": {
+    "/api/users": {
+      "get": {
+        "tags": ["Users"],
+        "summary": "Get all users",
+        "responses": {
+          "200": { "description": "List of users" }
+        }
+      },
+      "post": {
+        "tags": ["Users"],
+        "summary": "Create a user",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/UserInput" }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Created" },
+          "400": { "description": "Validation error" }
+        }
+      }
+    },
+    "/api/users/{id}": {
+      "get": {
+        "tags": ["Users"],
+        "summary": "Get user by ID",
+        "parameters": [{ "$ref": "#/components/parameters/IdParam" }],
+        "responses": {
+          "200": { "description": "OK" },
+          "400": { "description": "Invalid ID" },
+          "404": { "description": "Not found" }
+        }
+      },
+      "put": {
+        "tags": ["Users"],
+        "summary": "Update user",
+        "parameters": [{ "$ref": "#/components/parameters/IdParam" }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/UserUpdate" }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Updated" },
+          "400": { "description": "Validation error" },
+          "404": { "description": "Not found" }
+        }
+      },
+      "delete": {
+        "tags": ["Users"],
+        "summary": "Delete user",
+        "parameters": [{ "$ref": "#/components/parameters/IdParam" }],
+        "responses": {
+          "200": { "description": "Deleted" },
+          "404": { "description": "Not found" }
+        }
+      }
+    },
     "/api/categories": {
       "get": {
         "tags": ["Categories"],
@@ -213,6 +278,25 @@
       }
     },
     "schemas": {
+      "UserInput": {
+        "type": "object",
+        "required": ["email", "displayName"],
+        "properties": {
+          "email": { "type": "string", "format": "email" },
+          "displayName": { "type": "string" },
+          "preferredCurrency": { "type": "string" },
+          "googleId": { "type": "string" }
+        }
+      },
+      "UserUpdate": {
+        "type": "object",
+        "required": ["email", "displayName"],
+        "properties": {
+          "email": { "type": "string", "format": "email" },
+          "displayName": { "type": "string" },
+          "preferredCurrency": { "type": "string" }
+        }
+      },
       "CategoryInput": {
         "type": "object",
         "required": ["userId", "categoryName", "type"],
