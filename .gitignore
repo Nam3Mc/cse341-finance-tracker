@@ -1,0 +1,26 @@
+# Dependencias
+node_modules/
+
+# Archivos de entorno y credenciales
+.env
+
+# Logs de errores de npm
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Directorios de compilación o distribución
+dist/
+build/
+
+# Cobertura de pruebas
+coverage/
+
+# Archivos del sistema operativo
+.DS_Store
+Thumbs.db
+
+# Configuración del editor
+.vscode/
+.idea/

@@ -1,0 +1,299 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Personal Finance Tracker API",
+    "version": "1.0.0",
+    "description": "CSE 341 Week 3 - CRUD API for categories, accounts, and transactions"
+  },
+  "servers": [
+    {
+      "url": "/",
+      "description": "Current host (auto-detected)"
+    }
+  ],
+  "tags": [
+    { "name": "Categories" },
+    { "name": "Accounts" },
+    { "name": "Transactions" }
+  ],
+  "paths": {
+    "/api/categories": {
+      "get": {
+        "tags": ["Categories"],
+        "summary": "Get all categories",
+        "responses": {
+          "200": { "description": "List of categories" }
+        }
+      },
+      "post": {
+        "tags": ["Categories"],
+        "summary": "Create a category",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/CategoryInput" }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Created" },
+          "400": { "description": "Validation error" }
+        }
+      }
+    },
+    "/api/categories/{id}": {
+      "get": {
+        "tags": ["Categories"],
+        "summary": "Get category by ID",
+        "parameters": [{ "$ref": "#/components/parameters/IdParam" }],
+        "responses": {
+          "200": { "description": "OK" },
+          "404": { "description": "Not found" }
+        }
+      },
+      "put": {
+        "tags": ["Categories"],
+        "summary": "Update category",
+        "parameters": [{ "$ref": "#/components/parameters/IdParam" }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/CategoryUpdate" }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Updated" },
+          "400": { "description": "Validation error" },
+          "404": { "description": "Not found" }
+        }
+      },
+      "delete": {
+        "tags": ["Categories"],
+        "summary": "Delete category",
+        "parameters": [{ "$ref": "#/components/parameters/IdParam" }],
+        "responses": {
+          "200": { "description": "Deleted" },
+          "404": { "description": "Not found" }
+        }
+      }
+    },
+    "/api/accounts": {
+      "get": {
+        "tags": ["Accounts"],
+        "summary": "Get all accounts",
+        "responses": { "200": { "description": "List of accounts" } }
+      },
+      "post": {
+        "tags": ["Accounts"],
+        "summary": "Create an account",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/AccountInput" }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Created" },
+          "400": { "description": "Validation error" }
+        }
+      }
+    },
+    "/api/accounts/{id}": {
+      "get": {
+        "tags": ["Accounts"],
+        "summary": "Get account by ID",
+        "parameters": [{ "$ref": "#/components/parameters/IdParam" }],
+        "responses": {
+          "200": { "description": "OK" },
+          "404": { "description": "Not found" }
+        }
+      },
+      "put": {
+        "tags": ["Accounts"],
+        "summary": "Update account",
+        "parameters": [{ "$ref": "#/components/parameters/IdParam" }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/AccountUpdate" }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Updated" },
+          "400": { "description": "Validation error" },
+          "404": { "description": "Not found" }
+        }
+      },
+      "delete": {
+        "tags": ["Accounts"],
+        "summary": "Delete account",
+        "parameters": [{ "$ref": "#/components/parameters/IdParam" }],
+        "responses": {
+          "200": { "description": "Deleted" },
+          "404": { "description": "Not found" }
+        }
+      }
+    },
+    "/api/transactions": {
+      "get": {
+        "tags": ["Transactions"],
+        "summary": "Get all transactions",
+        "responses": { "200": { "description": "List of transactions" } }
+      },
+      "post": {
+        "tags": ["Transactions"],
+        "summary": "Create a transaction",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/TransactionInput" }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Created" },
+          "400": { "description": "Validation error" }
+        }
+      }
+    },
+    "/api/transactions/{id}": {
+      "get": {
+        "tags": ["Transactions"],
+        "summary": "Get transaction by ID",
+        "parameters": [{ "$ref": "#/components/parameters/IdParam" }],
+        "responses": {
+          "200": { "description": "OK" },
+          "404": { "description": "Not found" }
+        }
+      },
+      "put": {
+        "tags": ["Transactions"],
+        "summary": "Update transaction",
+        "parameters": [{ "$ref": "#/components/parameters/IdParam" }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/TransactionUpdate" }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Updated" },
+          "400": { "description": "Validation error" },
+          "404": { "description": "Not found" }
+        }
+      },
+      "delete": {
+        "tags": ["Transactions"],
+        "summary": "Delete transaction",
+        "parameters": [{ "$ref": "#/components/parameters/IdParam" }],
+        "responses": {
+          "200": { "description": "Deleted" },
+          "404": { "description": "Not found" }
+        }
+      }
+    }
+  },
+  "components": {
+    "parameters": {
+      "IdParam": {
+        "name": "id",
+        "in": "path",
+        "required": true,
+        "schema": { "type": "string" }
+      }
+    },
+    "schemas": {
+      "CategoryInput": {
+        "type": "object",
+        "required": ["userId", "categoryName", "type"],
+        "properties": {
+          "userId": { "type": "string" },
+          "categoryName": { "type": "string" },
+          "type": { "type": "string", "enum": ["income", "expense"] },
+          "color": { "type": "string" },
+          "icon": { "type": "string" }
+        }
+      },
+      "CategoryUpdate": {
+        "type": "object",
+        "required": ["categoryName", "type"],
+        "properties": {
+          "categoryName": { "type": "string" },
+          "type": { "type": "string", "enum": ["income", "expense"] },
+          "color": { "type": "string" },
+          "icon": { "type": "string" }
+        }
+      },
+      "AccountInput": {
+        "type": "object",
+        "required": ["userId", "accountName", "accountType"],
+        "properties": {
+          "userId": { "type": "string" },
+          "accountName": { "type": "string" },
+          "accountType": { "type": "string", "enum": ["personal", "business"] },
+          "currency": { "type": "string" },
+          "initialBalance": { "type": "number" },
+          "description": { "type": "string" }
+        }
+      },
+      "AccountUpdate": {
+        "type": "object",
+        "required": ["accountName", "accountType"],
+        "properties": {
+          "accountName": { "type": "string" },
+          "accountType": { "type": "string", "enum": ["personal", "business"] },
+          "currency": { "type": "string" },
+          "description": { "type": "string" },
+          "isActive": { "type": "boolean" }
+        }
+      },
+      "TransactionInput": {
+        "type": "object",
+        "required": ["userId", "accountId", "categoryId", "type", "amount", "description"],
+        "properties": {
+          "userId": { "type": "string" },
+          "accountId": { "type": "string" },
+          "categoryId": { "type": "string" },
+          "type": { "type": "string", "enum": ["income", "expense"] },
+          "amount": { "type": "number", "minimum": 0.01 },
+          "description": { "type": "string" },
+          "date": { "type": "string", "format": "date-time" },
+          "paymentMethod": {
+            "type": "string",
+            "enum": ["cash", "credit", "debit", "transfer", "other"]
+          },
+          "notes": { "type": "string" },
+          "tags": { "type": "array", "items": { "type": "string" } }
+        }
+      },
+      "TransactionUpdate": {
+        "type": "object",
+        "required": ["accountId", "categoryId", "type", "amount", "description"],
+        "properties": {
+          "accountId": { "type": "string" },
+          "categoryId": { "type": "string" },
+          "type": { "type": "string", "enum": ["income", "expense"] },
+          "amount": { "type": "number", "minimum": 0.01 },
+          "description": { "type": "string" },
+          "date": { "type": "string", "format": "date-time" },
+          "paymentMethod": {
+            "type": "string",
+            "enum": ["cash", "credit", "debit", "transfer", "other"]
+          },
+          "notes": { "type": "string" },
+          "tags": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    }
+  }
+}
