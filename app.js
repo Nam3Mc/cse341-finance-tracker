@@ -4,6 +4,7 @@ import swaggerUi from 'swagger-ui-express';
 import { createRequire } from 'module';
 import errorHandler from './middleware/errorHandler.js';
 import apiRouter from './routes/index.js';
+import { connectToDb } from './database/connect.js';
 
 // Load JSON via require-style since ESM JSON import needs a flag
 const require = createRequire(import.meta.url);
@@ -14,6 +15,14 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(async (req, res, next) => {
+  try {
+    await connectToDb()
+    next()
+  } catch (error) {
+    next(error)
+  }
+})
 
 // ─── Swagger UI with CDN assets ───
 // app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
