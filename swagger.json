@@ -3,7 +3,7 @@
   "info": {
     "title": "Personal Finance Tracker API",
     "version": "1.0.0",
-    "description": "CSE 341 Week 3 - CRUD API for users, categories, accounts, and transactions"
+    "description": "CSE 341 Week 3 - CRUD API for users, categories, accounts, and transactions with JWT authentication"
   },
   "servers": [
     {
@@ -12,18 +12,64 @@
     }
   ],
   "tags": [
+    { "name": "Auth" },
     { "name": "Users" },
     { "name": "Categories" },
     { "name": "Accounts" },
     { "name": "Transactions" }
   ],
+  "security": [
+    { "bearerAuth": [] }
+  ],
   "paths": {
+    "/api/auth/register": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "Register a new user",
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/RegisterInput" }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "User registered, returns JWT token" },
+          "400": { "description": "Validation error" },
+          "500": { "description": "Server error" }
+        }
+      }
+    },
+    "/api/auth/login": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "Login and receive a JWT token",
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/LoginInput" }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Login successful, returns JWT token" },
+          "400": { "description": "Missing email or password" },
+          "401": { "description": "Invalid credentials" },
+          "500": { "description": "Server error" }
+        }
+      }
+    },
     "/api/users": {
       "get": {
         "tags": ["Users"],
         "summary": "Get all users",
         "responses": {
-          "200": { "description": "List of users" }
+          "200": { "description": "List of users" },
+          "401": { "description": "Authentication required" }
         }
       },
       "post": {
@@ -39,7 +85,9 @@
         },
         "responses": {
           "201": { "description": "Created" },
-          "400": { "description": "Validation error" }
+          "400": { "description": "Validation error" },
+          "401": { "description": "Authentication required" },
+          "500": { "description": "Server error" }
         }
       }
     },
@@ -51,6 +99,7 @@
         "responses": {
           "200": { "description": "OK" },
           "400": { "description": "Invalid ID" },
+          "401": { "description": "Authentication required" },
           "404": { "description": "Not found" }
         }
       },
@@ -69,6 +118,7 @@
         "responses": {
           "200": { "description": "Updated" },
           "400": { "description": "Validation error" },
+          "401": { "description": "Authentication required" },
           "404": { "description": "Not found" }
         }
       },
@@ -78,6 +128,7 @@
         "parameters": [{ "$ref": "#/components/parameters/IdParam" }],
         "responses": {
           "200": { "description": "Deleted" },
+          "401": { "description": "Authentication required" },
           "404": { "description": "Not found" }
         }
       }
@@ -87,7 +138,8 @@
         "tags": ["Categories"],
         "summary": "Get all categories",
         "responses": {
-          "200": { "description": "List of categories" }
+          "200": { "description": "List of categories" },
+          "401": { "description": "Authentication required" }
         }
       },
       "post": {
@@ -103,7 +155,8 @@
         },
         "responses": {
           "201": { "description": "Created" },
-          "400": { "description": "Validation error" }
+          "400": { "description": "Validation error" },
+          "401": { "description": "Authentication required" }
         }
       }
     },
@@ -114,6 +167,7 @@
         "parameters": [{ "$ref": "#/components/parameters/IdParam" }],
         "responses": {
           "200": { "description": "OK" },
+          "401": { "description": "Authentication required" },
           "404": { "description": "Not found" }
         }
       },
@@ -132,6 +186,7 @@
         "responses": {
           "200": { "description": "Updated" },
           "400": { "description": "Validation error" },
+          "401": { "description": "Authentication required" },
           "404": { "description": "Not found" }
         }
       },
@@ -141,6 +196,7 @@
         "parameters": [{ "$ref": "#/components/parameters/IdParam" }],
         "responses": {
           "200": { "description": "Deleted" },
+          "401": { "description": "Authentication required" },
           "404": { "description": "Not found" }
         }
       }
@@ -149,7 +205,10 @@
       "get": {
         "tags": ["Accounts"],
         "summary": "Get all accounts",
-        "responses": { "200": { "description": "List of accounts" } }
+        "responses": {
+          "200": { "description": "List of accounts" },
+          "401": { "description": "Authentication required" }
+        }
       },
       "post": {
         "tags": ["Accounts"],
@@ -164,7 +223,8 @@
         },
         "responses": {
           "201": { "description": "Created" },
-          "400": { "description": "Validation error" }
+          "400": { "description": "Validation error" },
+          "401": { "description": "Authentication required" }
         }
       }
     },
@@ -175,6 +235,7 @@
         "parameters": [{ "$ref": "#/components/parameters/IdParam" }],
         "responses": {
           "200": { "description": "OK" },
+          "401": { "description": "Authentication required" },
           "404": { "description": "Not found" }
         }
       },
@@ -193,6 +254,7 @@
         "responses": {
           "200": { "description": "Updated" },
           "400": { "description": "Validation error" },
+          "401": { "description": "Authentication required" },
           "404": { "description": "Not found" }
         }
       },
@@ -202,6 +264,7 @@
         "parameters": [{ "$ref": "#/components/parameters/IdParam" }],
         "responses": {
           "200": { "description": "Deleted" },
+          "401": { "description": "Authentication required" },
           "404": { "description": "Not found" }
         }
       }
@@ -210,7 +273,10 @@
       "get": {
         "tags": ["Transactions"],
         "summary": "Get all transactions",
-        "responses": { "200": { "description": "List of transactions" } }
+        "responses": {
+          "200": { "description": "List of transactions" },
+          "401": { "description": "Authentication required" }
+        }
       },
       "post": {
         "tags": ["Transactions"],
@@ -225,7 +291,8 @@
         },
         "responses": {
           "201": { "description": "Created" },
-          "400": { "description": "Validation error" }
+          "400": { "description": "Validation error" },
+          "401": { "description": "Authentication required" }
         }
       }
     },
@@ -236,6 +303,7 @@
         "parameters": [{ "$ref": "#/components/parameters/IdParam" }],
         "responses": {
           "200": { "description": "OK" },
+          "401": { "description": "Authentication required" },
           "404": { "description": "Not found" }
         }
       },
@@ -254,6 +322,7 @@
         "responses": {
           "200": { "description": "Updated" },
           "400": { "description": "Validation error" },
+          "401": { "description": "Authentication required" },
           "404": { "description": "Not found" }
         }
       },
@@ -263,12 +332,21 @@
         "parameters": [{ "$ref": "#/components/parameters/IdParam" }],
         "responses": {
           "200": { "description": "Deleted" },
+          "401": { "description": "Authentication required" },
           "404": { "description": "Not found" }
         }
       }
     }
   },
   "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "Enter your JWT token. Get it from POST /api/auth/login or /api/auth/register."
+      }
+    },
     "parameters": {
       "IdParam": {
         "name": "id",
@@ -278,6 +356,24 @@
       }
     },
     "schemas": {
+      "RegisterInput": {
+        "type": "object",
+        "required": ["email", "password", "displayName"],
+        "properties": {
+          "email": { "type": "string", "format": "email" },
+          "password": { "type": "string", "minLength": 6 },
+          "displayName": { "type": "string" },
+          "preferredCurrency": { "type": "string", "default": "USD" }
+        }
+      },
+      "LoginInput": {
+        "type": "object",
+        "required": ["email", "password"],
+        "properties": {
+          "email": { "type": "string", "format": "email" },
+          "password": { "type": "string" }
+        }
+      },
       "UserInput": {
         "type": "object",
         "required": ["email", "displayName"],

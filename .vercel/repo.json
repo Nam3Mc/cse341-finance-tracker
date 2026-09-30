@@ -1,0 +1,11 @@
+{
+  "remoteName": "origin",
+  "projects": [
+    {
+      "id": "prj_sS2YPybig1b7HZcfexQueY0sdvyi",
+      "name": "cse341-finance-tracker",
+      "directory": ".",
+      "orgId": "team_NiTUjcKo4y8QposGQNmwiuBg"
+    }
+  ]
+}

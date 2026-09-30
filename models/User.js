@@ -1,5 +1,6 @@
 import { ObjectId } from 'mongodb';
 import { getDb } from '../database/connect.js';
+import bcrypt from 'bcryptjs';
 
 const COLLECTION = 'users';
 
@@ -31,14 +32,18 @@ const getById = async (id) => {
 // ─────────────────────────────────────────────
 const create = async (data) => {
   const db = getDb();
+  const hashedPassword = await bcrypt.hash(data.password, 10);
+
 
   const newUser = {
     googleId: data.googleId ?? null,
     email: data.email.toLowerCase().trim(),
     displayName: data.displayName.trim(),
     preferredCurrency: (data.preferredCurrency || 'USD').toUpperCase().trim(),
+    password: hashedPassword,
     createdAt: new Date(),
     updatedAt: new Date()
+
   };
 
   const result = await db.collection(COLLECTION).insertOne(newUser);

@@ -5,6 +5,8 @@ import { createRequire } from 'module';
 import errorHandler from './middleware/errorHandler.js';
 import apiRouter from './routes/index.js';
 import { connectToDb } from './database/connect.js';
+import authenticate from './middleware/auth.js';
+import authRouter from './routes/auth.js';
 
 // Load JSON via require-style since ESM JSON import needs a flag
 const require = createRequire(import.meta.url);
@@ -15,14 +17,16 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// DB connection middleware
 app.use(async (req, res, next) => {
   try {
-    await connectToDb()
-    next()
+    await connectToDb();
+    next();
   } catch (error) {
-    next(error)
+    next(error);
   }
-})
+});
 
 // ─── Swagger UI with CDN assets ───
 const SWAGGER_CSS_URL =
@@ -52,12 +56,19 @@ app.get('/', (req, res) => {
   res.status(200).json({ message: 'Finance Tracker API is running' });
 });
 
-app.use('/api', apiRouter);
+// ─── Public auth routes (register / login) ───
+app.use('/api/auth', authRouter);
 
+// ─── Protected API routes ───
+// Every route under /api (except /api/auth) now requires a valid JWT.
+app.use('/api', authenticate, apiRouter);
+
+// 404 handler
 app.use((req, res) => {
   res.status(404).json({ message: 'Route not found' });
 });
 
+// Global error handler (must be last)
 app.use(errorHandler);
 
 export default app;
