@@ -9,7 +9,9 @@ const COLLECTION = 'users';
 // ─────────────────────────────────────────────
 const getAll = async () => {
   const db = getDb();
-  return db.collection(COLLECTION).find().toArray();
+  return db.collection(COLLECTION)
+    .find({}, { projection: { password: 0 } })
+    .toArray();
 };
 
 // ─────────────────────────────────────────────
@@ -20,7 +22,10 @@ const getById = async (id) => {
     throw Object.assign(new Error('Invalid user ID'), { status: 400 });
   }
   const db = getDb();
-  const user = await db.collection(COLLECTION).findOne({ _id: new ObjectId(id) });
+  const user = await db.collection(COLLECTION).findOne(
+    { _id: new ObjectId(id) },
+    { projection: { password: 0 } }  
+  );
   if (!user) {
     throw Object.assign(new Error('User not found'), { status: 404 });
   }
@@ -70,7 +75,10 @@ const update = async (id, data) => {
   const result = await db.collection(COLLECTION).findOneAndUpdate(
     { _id: new ObjectId(id) },
     { $set: updatedDoc },
-    { returnDocument: 'after' }
+    {
+      returnDocument: 'after',
+      projection: { password: 0 }  
+    }
   );
 
   if (!result) {
