@@ -51,7 +51,7 @@ const create = async (data) => {
   };
 
   const result = await db.collection(COLLECTION).insertOne(newAccount);
-  return { _id: result.insertedId, ...newAccount };
+  return { _id: result._id, ...newAccount };
 };
 
 // ─────────────────────────────────────────────
