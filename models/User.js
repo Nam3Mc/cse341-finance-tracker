@@ -4,41 +4,34 @@ import bcrypt from 'bcryptjs';
 
 const COLLECTION = 'users';
 
-// ─────────────────────────────────────────────
-// GET all users
-// ─────────────────────────────────────────────
 const getAll = async () => {
   const db = getDb();
-  return db.collection(COLLECTION)
+  return db
+    .collection(COLLECTION)
     .find({}, { projection: { password: 0 } })
     .toArray();
 };
 
-// ─────────────────────────────────────────────
-// GET one user by ID
-// ─────────────────────────────────────────────
 const getById = async (id) => {
   if (!ObjectId.isValid(id)) {
     throw Object.assign(new Error('Invalid user ID'), { status: 400 });
   }
   const db = getDb();
-  const user = await db.collection(COLLECTION).findOne(
-    { _id: new ObjectId(id) },
-    { projection: { password: 0 } }  
-  );
+  const user = await db
+    .collection(COLLECTION)
+    .findOne({ _id: new ObjectId(id) }, { projection: { password: 0 } });
   if (!user) {
     throw Object.assign(new Error('User not found'), { status: 404 });
   }
   return user;
 };
 
-// ─────────────────────────────────────────────
-// POST — create user
-// ─────────────────────────────────────────────
 const create = async (data) => {
   const db = getDb();
-  const hashedPassword = await bcrypt.hash(data.password, 10);
 
+  const hashedPassword = data.password
+    ? await bcrypt.hash(data.password, 10)
+    : null;
 
   const newUser = {
     googleId: data.googleId ?? null,
@@ -47,17 +40,13 @@ const create = async (data) => {
     preferredCurrency: (data.preferredCurrency || 'USD').toUpperCase().trim(),
     password: hashedPassword,
     createdAt: new Date(),
-    updatedAt: new Date()
-
+    updatedAt: new Date(),
   };
 
   const result = await db.collection(COLLECTION).insertOne(newUser);
   return { _id: result.insertedId, ...newUser };
 };
 
-// ─────────────────────────────────────────────
-// PUT — update user
-// ─────────────────────────────────────────────
 const update = async (id, data) => {
   if (!ObjectId.isValid(id)) {
     throw Object.assign(new Error('Invalid user ID'), { status: 400 });
@@ -69,7 +58,7 @@ const update = async (id, data) => {
     email: data.email.toLowerCase().trim(),
     displayName: data.displayName.trim(),
     preferredCurrency: (data.preferredCurrency || 'USD').toUpperCase().trim(),
-    updatedAt: new Date()
+    updatedAt: new Date(),
   };
 
   const result = await db.collection(COLLECTION).findOneAndUpdate(
@@ -77,7 +66,7 @@ const update = async (id, data) => {
     { $set: updatedDoc },
     {
       returnDocument: 'after',
-      projection: { password: 0 }  
+      projection: { password: 0 },
     }
   );
 
@@ -87,16 +76,15 @@ const update = async (id, data) => {
   return result;
 };
 
-// ─────────────────────────────────────────────
-// DELETE — remove user
-// ─────────────────────────────────────────────
 const remove = async (id) => {
   if (!ObjectId.isValid(id)) {
     throw Object.assign(new Error('Invalid user ID'), { status: 400 });
   }
 
   const db = getDb();
-  const result = await db.collection(COLLECTION).deleteOne({ _id: new ObjectId(id) });
+  const result = await db
+    .collection(COLLECTION)
+    .deleteOne({ _id: new ObjectId(id) });
 
   if (result.deletedCount === 0) {
     throw Object.assign(new Error('User not found'), { status: 404 });
@@ -104,12 +92,11 @@ const remove = async (id) => {
   return result;
 };
 
-// ─────────────────────────────────────────────
-// Helper: find by email (used for duplicate check)
-// ─────────────────────────────────────────────
 const findByEmail = async (email) => {
   const db = getDb();
-  return db.collection(COLLECTION).findOne({ email: email.toLowerCase().trim() });
+  return db
+    .collection(COLLECTION)
+    .findOne({ email: email.toLowerCase().trim() });
 };
 
 export { getAll, getById, create, update, remove, findByEmail };

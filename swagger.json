@@ -2,8 +2,8 @@
   "openapi": "3.0.0",
   "info": {
     "title": "Personal Finance Tracker API",
-    "version": "1.0.0",
-    "description": "CSE 341 Week 3 - CRUD API for users, categories, accounts, and transactions with JWT authentication"
+    "version": "2.0.0",
+    "description": "CSE 341 - CRUD API for users, categories, accounts, and transactions. Supports Google OAuth 2.0 (session-based) and email/password JWT authentication."
   },
   "servers": [
     {
@@ -19,13 +19,13 @@
     { "name": "Transactions" }
   ],
   "security": [
-    { "bearerAuth": [] }
+    { "cookieAuth": [] }
   ],
   "paths": {
     "/api/auth/register": {
       "post": {
         "tags": ["Auth"],
-        "summary": "Register a new user",
+        "summary": "Register a new user with email and password",
         "security": [],
         "requestBody": {
           "required": true,
@@ -45,7 +45,7 @@
     "/api/auth/login": {
       "post": {
         "tags": ["Auth"],
-        "summary": "Login and receive a JWT token",
+        "summary": "Login with email and password to receive a JWT token",
         "security": [],
         "requestBody": {
           "required": true,
@@ -63,13 +63,77 @@
         }
       }
     },
+    "/api/auth/google": {
+      "get": {
+        "tags": ["Auth"],
+        "summary": "Start Google OAuth 2.0 login flow",
+        "description": "Redirects the user to Google's consent screen. After authorization, Google redirects back to /api/auth/google/callback.",
+        "security": [],
+        "responses": {
+          "302": { "description": "Redirects to Google's OAuth consent screen" }
+        }
+      }
+    },
+    "/api/auth/google/callback": {
+      "get": {
+        "tags": ["Auth"],
+        "summary": "Google OAuth 2.0 callback",
+        "description": "Handled automatically by Google after user authorization. Creates or links a user, establishes a session, and redirects to CLIENT_URL (if set) or returns a JSON response.",
+        "security": [],
+        "responses": {
+          "200": { "description": "Login successful, session established" },
+          "302": { "description": "Redirects to the frontend after successful login" },
+          "401": { "description": "Google authentication failed" }
+        }
+      }
+    },
+    "/api/auth/google/failure": {
+      "get": {
+        "tags": ["Auth"],
+        "summary": "Google OAuth failure handler",
+        "security": [],
+        "responses": {
+          "401": { "description": "Google authentication failed" }
+        }
+      }
+    },
+    "/api/auth/logout": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "Log out the current OAuth session",
+        "description": "Destroys the server-side session and clears the session cookie.",
+        "security": [{ "cookieAuth": [] }],
+        "responses": {
+          "200": { "description": "Logged out successfully" },
+          "500": { "description": "Server error during logout" }
+        }
+      }
+    },
+    "/api/auth/me": {
+      "get": {
+        "tags": ["Auth"],
+        "summary": "Get the currently authenticated OAuth user",
+        "security": [{ "cookieAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Current user info",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/CurrentUser" }
+              }
+            }
+          },
+          "401": { "description": "Not authenticated" }
+        }
+      }
+    },
     "/api/users": {
       "get": {
         "tags": ["Users"],
         "summary": "Get all users",
         "responses": {
           "200": { "description": "List of users" },
-          "401": { "description": "Authentication required" }
+          "401": { "description": "OAuth session required" }
         }
       },
       "post": {
@@ -86,7 +150,7 @@
         "responses": {
           "201": { "description": "Created" },
           "400": { "description": "Validation error" },
-          "401": { "description": "Authentication required" },
+          "401": { "description": "OAuth session required" },
           "500": { "description": "Server error" }
         }
       }
@@ -99,7 +163,7 @@
         "responses": {
           "200": { "description": "OK" },
           "400": { "description": "Invalid ID" },
-          "401": { "description": "Authentication required" },
+          "401": { "description": "OAuth session required" },
           "404": { "description": "Not found" }
         }
       },
@@ -118,7 +182,7 @@
         "responses": {
           "200": { "description": "Updated" },
           "400": { "description": "Validation error" },
-          "401": { "description": "Authentication required" },
+          "401": { "description": "OAuth session required" },
           "404": { "description": "Not found" }
         }
       },
@@ -128,7 +192,7 @@
         "parameters": [{ "$ref": "#/components/parameters/IdParam" }],
         "responses": {
           "200": { "description": "Deleted" },
-          "401": { "description": "Authentication required" },
+          "401": { "description": "OAuth session required" },
           "404": { "description": "Not found" }
         }
       }
@@ -139,7 +203,7 @@
         "summary": "Get all categories",
         "responses": {
           "200": { "description": "List of categories" },
-          "401": { "description": "Authentication required" }
+          "401": { "description": "OAuth session required" }
         }
       },
       "post": {
@@ -156,7 +220,7 @@
         "responses": {
           "201": { "description": "Created" },
           "400": { "description": "Validation error" },
-          "401": { "description": "Authentication required" }
+          "401": { "description": "OAuth session required" }
         }
       }
     },
@@ -167,7 +231,7 @@
         "parameters": [{ "$ref": "#/components/parameters/IdParam" }],
         "responses": {
           "200": { "description": "OK" },
-          "401": { "description": "Authentication required" },
+          "401": { "description": "OAuth session required" },
           "404": { "description": "Not found" }
         }
       },
@@ -186,7 +250,7 @@
         "responses": {
           "200": { "description": "Updated" },
           "400": { "description": "Validation error" },
-          "401": { "description": "Authentication required" },
+          "401": { "description": "OAuth session required" },
           "404": { "description": "Not found" }
         }
       },
@@ -196,7 +260,7 @@
         "parameters": [{ "$ref": "#/components/parameters/IdParam" }],
         "responses": {
           "200": { "description": "Deleted" },
-          "401": { "description": "Authentication required" },
+          "401": { "description": "OAuth session required" },
           "404": { "description": "Not found" }
         }
       }
@@ -207,7 +271,7 @@
         "summary": "Get all accounts",
         "responses": {
           "200": { "description": "List of accounts" },
-          "401": { "description": "Authentication required" }
+          "401": { "description": "OAuth session required" }
         }
       },
       "post": {
@@ -224,7 +288,7 @@
         "responses": {
           "201": { "description": "Created" },
           "400": { "description": "Validation error" },
-          "401": { "description": "Authentication required" }
+          "401": { "description": "OAuth session required" }
         }
       }
     },
@@ -235,7 +299,7 @@
         "parameters": [{ "$ref": "#/components/parameters/IdParam" }],
         "responses": {
           "200": { "description": "OK" },
-          "401": { "description": "Authentication required" },
+          "401": { "description": "OAuth session required" },
           "404": { "description": "Not found" }
         }
       },
@@ -254,7 +318,7 @@
         "responses": {
           "200": { "description": "Updated" },
           "400": { "description": "Validation error" },
-          "401": { "description": "Authentication required" },
+          "401": { "description": "OAuth session required" },
           "404": { "description": "Not found" }
         }
       },
@@ -264,7 +328,7 @@
         "parameters": [{ "$ref": "#/components/parameters/IdParam" }],
         "responses": {
           "200": { "description": "Deleted" },
-          "401": { "description": "Authentication required" },
+          "401": { "description": "OAuth session required" },
           "404": { "description": "Not found" }
         }
       }
@@ -275,7 +339,7 @@
         "summary": "Get all transactions",
         "responses": {
           "200": { "description": "List of transactions" },
-          "401": { "description": "Authentication required" }
+          "401": { "description": "OAuth session required" }
         }
       },
       "post": {
@@ -292,7 +356,7 @@
         "responses": {
           "201": { "description": "Created" },
           "400": { "description": "Validation error" },
-          "401": { "description": "Authentication required" }
+          "401": { "description": "OAuth session required" }
         }
       }
     },
@@ -303,7 +367,7 @@
         "parameters": [{ "$ref": "#/components/parameters/IdParam" }],
         "responses": {
           "200": { "description": "OK" },
-          "401": { "description": "Authentication required" },
+          "401": { "description": "OAuth session required" },
           "404": { "description": "Not found" }
         }
       },
@@ -322,7 +386,7 @@
         "responses": {
           "200": { "description": "Updated" },
           "400": { "description": "Validation error" },
-          "401": { "description": "Authentication required" },
+          "401": { "description": "OAuth session required" },
           "404": { "description": "Not found" }
         }
       },
@@ -332,7 +396,7 @@
         "parameters": [{ "$ref": "#/components/parameters/IdParam" }],
         "responses": {
           "200": { "description": "Deleted" },
-          "401": { "description": "Authentication required" },
+          "401": { "description": "OAuth session required" },
           "404": { "description": "Not found" }
         }
       }
@@ -344,7 +408,13 @@
         "type": "http",
         "scheme": "bearer",
         "bearerFormat": "JWT",
-        "description": "Enter your JWT token. Get it from POST /api/auth/login or /api/auth/register."
+        "description": "JWT token from POST /api/auth/login or /api/auth/register. Used by the email/password flow."
+      },
+      "cookieAuth": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "connect.sid",
+        "description": "OAuth session cookie. Obtained by visiting GET /api/auth/google in a browser. Required for all protected routes."
       }
     },
     "parameters": {
@@ -372,6 +442,15 @@
         "properties": {
           "email": { "type": "string", "format": "email" },
           "password": { "type": "string" }
+        }
+      },
+      "CurrentUser": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "email": { "type": "string", "format": "email" },
+          "displayName": { "type": "string" },
+          "preferredCurrency": { "type": "string" }
         }
       },
       "UserInput": {

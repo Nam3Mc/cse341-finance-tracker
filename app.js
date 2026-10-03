@@ -1,24 +1,24 @@
 import express from 'express';
 import cors from 'cors';
+import session from 'express-session';
+import MongoStore from 'connect-mongo';
 import swaggerUi from 'swagger-ui-express';
 import { createRequire } from 'module';
 import errorHandler from './middleware/errorHandler.js';
 import apiRouter from './routes/index.js';
 import { connectToDb } from './database/connect.js';
-import authenticate from './middleware/auth.js';
 import authRouter from './routes/auth.js';
+import passport from './config/passport.js';
 
-// Load JSON via require-style since ESM JSON import needs a flag
 const require = createRequire(import.meta.url);
 const swaggerDocument = require('./swagger.json');
 
 const app = express();
 
-app.use(cors());
+app.use(cors({ origin: true, credentials: true }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// DB connection middleware
 app.use(async (req, res, next) => {
   try {
     await connectToDb();
@@ -28,7 +28,29 @@ app.use(async (req, res, next) => {
   }
 });
 
-// ─── Swagger UI with CDN assets ───
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET || 'change-me-in-prod',
+    resave: false,
+    saveUninitialized: false,
+    store: MongoStore.create({
+      mongoUrl: process.env.MONGODB_URI,
+      dbName: process.env.MONGODB_DB_NAME,
+      collectionName: 'sessions',
+      ttl: 60 * 60 * 24,
+    }),
+    cookie: {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+      maxAge: 1000 * 60 * 60 * 24,
+    },
+  })
+);
+
+app.use(passport.initialize());
+app.use(passport.session());
+
 const SWAGGER_CSS_URL =
   'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.15.5/swagger-ui.min.css';
 const SWAGGER_JS_URLS = [
@@ -50,25 +72,19 @@ app.use(
     swaggerOptions: { url: '/docs.json' },
   })
 );
-// ─── Swagger UI with CDN assets ───
 
 app.get('/', (req, res) => {
   res.status(200).json({ message: 'Finance Tracker API is running' });
 });
 
-// ─── Public auth routes (register / login) ───
 app.use('/api/auth', authRouter);
 
-// ─── Protected API routes ───
-// Every route under /api (except /api/auth) now requires a valid JWT.
-app.use('/api', authenticate, apiRouter);
+app.use('/api', apiRouter);
 
-// 404 handler
 app.use((req, res) => {
   res.status(404).json({ message: 'Route not found' });
 });
 
-// Global error handler (must be last)
 app.use(errorHandler);
 
 export default app;
