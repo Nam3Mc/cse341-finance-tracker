@@ -11,7 +11,7 @@ router.post('/login', login);
 router.get(
   '/google',
   passport.authenticate('google', {
-    scope: ['profile', 'email'],
+    scope: ['openid', 'profile', 'email'],
     prompt: 'select_account',
   })
 );
