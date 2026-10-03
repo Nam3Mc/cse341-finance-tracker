@@ -11,7 +11,7 @@ router.post('/login', login);
 router.get(
   '/google',
   passport.authenticate('google', {
-    scope: ['openid', 'profile', 'email'],
+    scope: ['opend', 'profile', 'email'],
     prompt: 'select_account',
   })
 );
@@ -23,7 +23,7 @@ router.get(
   }),
   (req, res) => {
     if (process.env.CLIENT_URL) {
-      return res.redirect(`${process.env.CLIENT_URL}/dashboard`);
+      return res.redirect(`${process.env.CLIENT_URL}/api-docs`);
     }
     return res.json({
       message: 'Login successful',
